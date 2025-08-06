@@ -1,0 +1,53 @@
+# Ignore binaries and build output
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Ignore user-specific files
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.opensdf
+*.VC.db
+*.VC.opendb
+
+# Ignore macOS files
+.DS_Store
+
+# Ignore Windows thumbnail cache
+Thumbs.db
+
+# Ignore compiled files
+*.exe
+*.dll
+*.lib
+*.app
+*.pdb
+
+# Ignore logs and backups
+*.log
+*.backup
+*.tmp
+
+# Ignore Unreal auto-generated project files
+*.xcodeproj
+*.xcworkspace
+*.xcuserdata
+*.vs/
+*.idea/
+
+# Ignore config files for IDEs (Optional)
+.vs/
+.idea/
+.vscode/
+
+# Ignore Unreal Engine-specific files (from plugins or packs)
+*.uasset
+*.umap
+
+# Optional: Ignore local project settings if working in a team
+Config/DefaultEditorPerProjectUserSettings.ini
