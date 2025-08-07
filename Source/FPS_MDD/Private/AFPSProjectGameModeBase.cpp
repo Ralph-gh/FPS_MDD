@@ -12,4 +12,9 @@ void AFPSProjectGameModeBase::StartPlay()
 
     // 1. To print to screen
     GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Hello World, this is FPSGameModeBase! RG message"));
+
+    int TestNumber = 10;
+    bool BoolTest = false;
+    FString NameTest = ("Your string here");
+
 }
