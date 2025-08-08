@@ -49,9 +49,11 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	//I like to move it move it
 	PlayerInputComponent->BindAxis("MoveForward",this, &AFPSCharacter::MoveForward);
 
+	PlayerInputComponent->BindAxis("MoveRight", this, &AFPSCharacter::MoveRight);
+
 	//Look
 	PlayerInputComponent->BindAxis("LookHorizontal", this, &AFPSCharacter::AddControllerYawInput);
-
+	PlayerInputComponent->BindAxis("LookVertical", this, &AFPSCharacter::AddControllerPitchInput);
 	//Jumpy Jumpy
 	PlayerInputComponent->BindAction("Jump", IE_Pressed,this, &AFPSCharacter::StartJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFPSCharacter::EndJump);

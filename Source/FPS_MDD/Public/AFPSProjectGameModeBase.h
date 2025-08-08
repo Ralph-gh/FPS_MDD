@@ -13,6 +13,8 @@ UCLASS()
 class FPS_MDD_API AFPSProjectGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+
 protected:
 	virtual void StartPlay() override;
 };
