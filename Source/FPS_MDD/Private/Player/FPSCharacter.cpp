@@ -126,7 +126,7 @@ void AFPSCharacter::Fire()
 
 	// Draw debug line so you can see it in PIE
 	const FColor LineColor = bHit ? FColor::Red : FColor::Green;
-	DrawDebugLine(World, Start, bHit ? Hit.ImpactPoint : End, LineColor, false, 1.5f, 0, 1.5f);
+	DrawDebugLine(World, Start, bHit ? Hit.ImpactPoint : End, LineColor, false, 0.7f, 0, 0.7f);
 
 	if (bHit && Hit.GetActor())
 	{
