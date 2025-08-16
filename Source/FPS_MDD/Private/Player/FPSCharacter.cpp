@@ -2,7 +2,9 @@
 
 
 #include "Player/FPSCharacter.h"
-
+#include "DrawDebugHelpers.h"
+#include "Projectile/FPSProjectile.h"
+#include "Engine/Engine.h"
 // Sets default values
 AFPSCharacter::AFPSCharacter()
 {
@@ -31,7 +33,8 @@ AFPSCharacter::AFPSCharacter()
 void AFPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, TEXT("AFPSCharacter C++ BeginPlay"));
 }
 
 // Called every frame
@@ -57,6 +60,8 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	//Jumpy Jumpy
 	PlayerInputComponent->BindAction("Jump", IE_Pressed,this, &AFPSCharacter::StartJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFPSCharacter::EndJump);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
 
 }
 
@@ -88,6 +93,67 @@ void AFPSCharacter::EndJump()
 
 void AFPSCharacter::Fire()
 {
+
+	UWorld* World = GetWorld();
+	if (!World) return;
+	// Camera location & rotation
+	FVector CamLoc;
+	FRotator CamRot;
+	GetActorEyesViewPoint(CamLoc, CamRot);
+
+	
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Yellow, TEXT("FIRE pressed"));
+	}
+
+	const float TraceRange = 5000.f; // 50 meters
+	const FVector Start = CamLoc;
+	const FVector End = Start + (CamRot.Vector() * TraceRange);
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(WeaponTrace), /*bTraceComplex=*/true, this);
+	Params.bReturnPhysicalMaterial = false;
+
+	FHitResult Hit;
+
+	const bool bHit = World->LineTraceSingleByChannel(
+		Hit,
+		Start,
+		End,
+		ECC_Visibility,
+		Params
+	);
+
+	// Draw debug line so you can see it in PIE
+	const FColor LineColor = bHit ? FColor::Red : FColor::Green;
+	DrawDebugLine(World, Start, bHit ? Hit.ImpactPoint : End, LineColor, false, 1.5f, 0, 1.5f);
+
+	if (bHit && Hit.GetActor())
+	{
+		// Simple feedback in the log
+		UE_LOG(LogTemp, Log, TEXT("Hit: %s at %s"),
+			*Hit.GetActor()->GetName(),
+			*Hit.ImpactPoint.ToString());
+
+		// TODO: Apply damage later:
+		// UGameplayStatics::ApplyPointDamage(Hit.GetActor(), 10.f, CamRot.Vector(), Hit, GetController(), this, UDamageType::StaticClass());
+	}
+
+	if (!ProjectileClass) return;
+
+	const FVector SpawnLoc =
+		CamLoc + CamRot.Vector() * MuzzleOffset.X +
+		CamRot.RotateVector(FVector(0.f, MuzzleOffset.Y, MuzzleOffset.Z));
+
+	const FRotator SpawnRot = CamRot;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+	SpawnParams.SpawnCollisionHandlingOverride =
+		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	World->SpawnActor<AFPSProjectile>(ProjectileClass, SpawnLoc, SpawnRot, SpawnParams);
 	/*if (!ProjectileClass) return;
 
 	// Init relevant infomration for where the projectile will be

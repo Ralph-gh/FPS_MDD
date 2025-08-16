@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "FPSCharacter.generated.h"
 
+class AFPSProjectile;
 
 UCLASS()
 class FPS_MDD_API AFPSCharacter : public ACharacter
@@ -21,6 +22,12 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	TSubclassOf<AFPSProjectile> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	FVector MuzzleOffset = FVector(80.f, 0.f, 0.f);
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
