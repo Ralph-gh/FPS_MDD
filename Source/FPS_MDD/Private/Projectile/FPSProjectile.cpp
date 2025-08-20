@@ -30,8 +30,8 @@ AFPSProjectile::AFPSProjectile()
     Collision->OnComponentHit.AddDynamic(this, &AFPSProjectile::OnHit);
 }
 
-void AFPSProjectile::OnHit(UPrimitiveComponent* /*HitComp*/, AActor* OtherActor,
-    UPrimitiveComponent* /*OtherComp*/, FVector /*NormalImpulse*/, const FHitResult& /*Hit*/)
+void AFPSProjectile::OnHit(UPrimitiveComponent*, AActor* OtherActor,
+    UPrimitiveComponent*, FVector , const FHitResult&)
 {
     if (OtherActor && OtherActor != GetOwner())
     {
