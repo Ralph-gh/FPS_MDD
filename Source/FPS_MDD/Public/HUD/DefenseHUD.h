@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "GUI/Slate/SSettingsWidget.h"
 #include "DefenseHUD.generated.h"
 
 /**
@@ -19,6 +20,14 @@ public:
 	// We'll call this from gameplay code later
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void SetBaseHealth(float InCurrent, float InMax);
+	//UTexture2D* CrosshairTexture;
+
+	//Slates Method of Making UI
+	TSharedPtr<class SSettingsWidget> SettingsWidget;
+	TSharedPtr<class SWidget> SlateWidgetContainer;
+
+	void ShowSettingsMenu();   //Used to show settings menu
+	void HideSettingsMenu();
 
 private:
 	// Temporary demo values

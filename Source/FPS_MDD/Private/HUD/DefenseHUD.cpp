@@ -2,6 +2,8 @@
 
 
 #include "HUD/DefenseHUD.h"
+#include "GUI/Slate/SSettingsWidget.h"
+#include "Widgets/SWeakWidget.h"
 #include "Engine/Canvas.h"
 #include "CanvasItem.h"
 
@@ -9,6 +11,32 @@ void ADefenseHUD::SetBaseHealth(float InCurrent, float InMax)
 {
 	MaxHealth = FMath::Max(1.f, InMax);
 	CurrentHealth = FMath::Clamp(InCurrent, 0.f, MaxHealth);
+
+	Super::BeginPlay();
+
+	ShowSettingsMenu();
+
+}
+
+
+
+void ADefenseHUD::ShowSettingsMenu()
+{
+	SettingsWidget = SNew(SSettingsWidget);
+	GEngine-> GameViewport->AddViewportWidgetContent(SAssignNew(SlateWidgetContainer, SWeakWidget).PossiblyNullContent(SettingsWidget.ToSharedRef()));
+
+	PlayerOwner->bShowMouseCursor = true;
+	PlayerOwner->SetInputMode(FInputModeUIOnly());
+
+
+}
+
+void ADefenseHUD::HideSettingsMenu()
+{
+	GEngine->GameViewport->AddViewportWidgetContent(SAssignNew(SlateWidgetContainer, SWeakWidget).PossiblyNullContent(SettingsWidget.ToSharedRef()));
+
+	PlayerOwner->bShowMouseCursor = false;
+	PlayerOwner->SetInputMode(FInputModeUIOnly());
 }
 
 void ADefenseHUD::DrawHUD()
@@ -30,6 +58,7 @@ void ADefenseHUD::DrawHUD()
 		BarPos, FVector2D(BarSize.X * ratio, BarSize.Y));
 
 	// label (big so you notice it)
+
 	if (GEngine)
 	{
 		Canvas->DrawText(GEngine->GetLargeFont(),
@@ -37,6 +66,9 @@ void ADefenseHUD::DrawHUD()
 				FMath::RoundToInt(CurrentHealth), FMath::RoundToInt(MaxHealth)),
 			BarPos.X, BarPos.Y - 32.f);
 	}
+	//if (!CrosshairTexture) return;
+
+
 	//DrawHealthBar();
 }
 
