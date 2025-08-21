@@ -18,24 +18,29 @@ void ADefenseHUD::DrawHUD()
 
 	UE_LOG(LogTemp, Warning, TEXT("ADefenseHUD::DrawHUD() called"));
 
-	if (Canvas && GEngine)
-	{
-		// Simple visible text
-		Canvas->DrawText(
-			GEngine->GetLargeFont(),           // use bigger font so you see it
-			TEXT("HELLO FROM HUD"),
-			300.f, 300.f                       // screen X,Y
-		);
+	if (!Canvas) return;
 
-		// On-screen debug message too
-		GEngine->AddOnScreenDebugMessage(
-			-1, 1.5f, FColor::Red, TEXT("HUD is alive")
-		);
+	const float ratio = FMath::Clamp(CurrentHealth / FMath::Max(1.f, MaxHealth), 0.f, 1.f);
+
+	// background
+	DrawRectFilled(FLinearColor(0.f, 0.f, 0.f, 0.6f), BarPos, BarSize);
+
+	// fill
+	DrawRectFilled(FLinearColor(0.1f, 0.8f, 0.2f, 0.9f),
+		BarPos, FVector2D(BarSize.X * ratio, BarSize.Y));
+
+	// label (big so you notice it)
+	if (GEngine)
+	{
+		Canvas->DrawText(GEngine->GetLargeFont(),
+			FString::Printf(TEXT("Base %d / %d"),
+				FMath::RoundToInt(CurrentHealth), FMath::RoundToInt(MaxHealth)),
+			BarPos.X, BarPos.Y - 32.f);
 	}
-	DrawHealthBar();
+	//DrawHealthBar();
 }
 
-void ADefenseHUD::DrawHealthBar()
+/*void ADefenseHUD::DrawHealthBar()
 {
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
@@ -68,7 +73,8 @@ void ADefenseHUD::DrawHealthBar()
 	FCanvasTextItem TextItem(FVector2D(BarPos.X, BarPos.Y - 18.f), FText::FromString(Label), GEngine->GetSmallFont(), FLinearColor::White);
 	TextItem.EnableShadow(FLinearColor::Black);
 	Canvas->DrawItem(TextItem);
-}
+}*/
+
 
 void ADefenseHUD::DrawRectFilled(const FLinearColor& Color, const FVector2D& Pos, const FVector2D& Size)
 {

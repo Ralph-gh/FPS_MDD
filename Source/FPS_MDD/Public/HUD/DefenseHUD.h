@@ -28,9 +28,7 @@ private:
 	// Layout
 	FVector2D BarPos = FVector2D(50.f, 50.f);
 	FVector2D BarSize = FVector2D(300.f, 24.f);
-	float CurrentHealth = 65.f; // demo
-	float MaxHealth = 100.f;
-
+	
 	//void DrawHealthBar();
 	void DrawRectFilled(const FLinearColor& Color, const FVector2D& Pos, const FVector2D& Size);
 };
