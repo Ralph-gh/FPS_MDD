@@ -17,4 +17,5 @@ class FPS_MDD_API AFPSProjectGameModeBase : public AGameModeBase
 
 protected:
 	virtual void StartPlay() override;
+	AFPSProjectGameModeBase();
 };

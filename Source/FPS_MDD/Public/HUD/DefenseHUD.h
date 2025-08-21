@@ -13,5 +13,25 @@ UCLASS()
 class FPS_MDD_API ADefenseHUD : public AHUD
 {
 	GENERATED_BODY()
-	
+public:
+	virtual void DrawHUD() override;
+
+	// We'll call this from gameplay code later
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void SetBaseHealth(float InCurrent, float InMax);
+
+private:
+	// Temporary demo values
+	float CurrentHealth = 100.f;
+	float MaxHealth = 100.f;
+
+	// Layout
+	FVector2D BarPos = FVector2D(50.f, 50.f);
+	FVector2D BarSize = FVector2D(300.f, 24.f);
+	float CurrentHealth = 65.f; // demo
+	float MaxHealth = 100.f;
+
+	//void DrawHealthBar();
+	void DrawRectFilled(const FLinearColor& Color, const FVector2D& Pos, const FVector2D& Size);
 };
+
