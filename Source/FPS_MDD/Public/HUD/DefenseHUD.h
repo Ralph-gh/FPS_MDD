@@ -16,7 +16,7 @@ class FPS_MDD_API ADefenseHUD : public AHUD
 	GENERATED_BODY()
 public:
 	virtual void DrawHUD() override;
-
+	virtual void BeginPlay() override;
 	// We'll call this from gameplay code later
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void SetBaseHealth(float InCurrent, float InMax);

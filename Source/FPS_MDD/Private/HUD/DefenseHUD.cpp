@@ -12,12 +12,15 @@ void ADefenseHUD::SetBaseHealth(float InCurrent, float InMax)
 	MaxHealth = FMath::Max(1.f, InMax);
 	CurrentHealth = FMath::Clamp(InCurrent, 0.f, MaxHealth);
 
+	
+
+}
+void ADefenseHUD::BeginPlay()
+{
 	Super::BeginPlay();
 
 	ShowSettingsMenu();
-
 }
-
 
 
 void ADefenseHUD::ShowSettingsMenu()
