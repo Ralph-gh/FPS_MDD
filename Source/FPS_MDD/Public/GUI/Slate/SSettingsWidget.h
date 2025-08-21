@@ -22,4 +22,8 @@ public:
 	*/
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+	FReply OnResumeClicked()const;
+	FReply OnSettingsClicked() const;
+	FReply OnQuitClicked() const;
+
 };
