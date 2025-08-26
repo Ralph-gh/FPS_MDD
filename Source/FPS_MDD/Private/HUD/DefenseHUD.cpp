@@ -98,25 +98,18 @@ void ADefenseHUD::DrawHUD()
 
     if (bShowGameEnded)
     {
-        // Center the text on screen
         const FString Msg = TEXT("GAME ENDED");
-        const float X = Canvas->ClipX * 0.5f;
-        const float Y = Canvas->ClipY * 0.5f;
 
-        FSlateFontInfo BigFont = FCoreStyle::GetDefaultFontStyle("Regular", 72); //Font and Text size control
+        // Use an engine font (UFont*)
+        UFont* Font = GEngine ? GEngine->GetLargeFont() : nullptr;
+        FCanvasTextItem Item(FVector2D::ZeroVector, FText::FromString(TEXT("GAME ENDED")), Font, FLinearColor::Red);
+        Item.EnableShadow(FLinearColor::Black);
+        Item.Scale = FVector2D(7.5f * (Canvas->ClipY / 1080.f)); // same scale both axes
+        Item.bCentreX = true;
+        Item.bCentreY = true;
+        Canvas->DrawItem(Item, FVector2D(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f));
 
-        FCanvasTextItem TextItem(
-            FVector2D(X, Y),
-            FText::FromString(Msg),
-            BigFont,
-            FLinearColor::Red
-        );
-        TextItem.EnableShadow(FLinearColor::Black);
-        TextItem.bCentreX = true;
-        TextItem.bCentreY = true;
-
-        Canvas->DrawItem(TextItem);
-        return; // skip health bar etc if you like
+        return; // skip other HUD when showing end screen
     }
 
 
