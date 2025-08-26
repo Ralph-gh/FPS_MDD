@@ -17,6 +17,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;
 
+	bool bShowGameEnded = false;//flag for Endgame
+
 	// Health hook
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void SetBaseHealth(float InCurrent, float InMax);

@@ -13,8 +13,15 @@ void ADefenseHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// For testing, show menu on start
-	ShowSettingsMenu();
+    const FString Map = UGameplayStatics::GetCurrentLevelName(this,true);
+    if (Map.Equals(TEXT("Endgame"), ESearchCase::IgnoreCase))
+    {
+        bShowGameEnded = true;   // <-- new flag
+    }
+    else
+    {
+        ShowSettingsMenu();
+    }
 }
 
 void ADefenseHUD::SetBaseHealth(float InCurrent, float InMax)
@@ -89,6 +96,30 @@ void ADefenseHUD::DrawHUD()
 
 	if (!Canvas) return;
 
+    if (bShowGameEnded)
+    {
+        // Center the text on screen
+        const FString Msg = TEXT("GAME ENDED");
+        const float X = Canvas->ClipX * 0.5f;
+        const float Y = Canvas->ClipY * 0.5f;
+
+        FSlateFontInfo BigFont = FCoreStyle::GetDefaultFontStyle("Regular", 72); //Font and Text size control
+
+        FCanvasTextItem TextItem(
+            FVector2D(X, Y),
+            FText::FromString(Msg),
+            BigFont,
+            FLinearColor::Red
+        );
+        TextItem.EnableShadow(FLinearColor::Black);
+        TextItem.bCentreX = true;
+        TextItem.bCentreY = true;
+
+        Canvas->DrawItem(TextItem);
+        return; // skip health bar etc if you like
+    }
+
+
 	const float Ratio = FMath::Clamp(CurrentHealth / FMath::Max(1.f, MaxHealth), 0.f, 1.f);
 
 	// Background
@@ -160,11 +191,28 @@ void ADefenseHUD::HideEndLevelButton()
     bEndButtonVisible = false;
 }
 
+static void LogCurrentMap(UObject* WorldContext, const TCHAR* Tag)
+{
+    const FString Name = UGameplayStatics::GetCurrentLevelName(WorldContext, /*bRemovePrefix=*/true);
+    UE_LOG(LogTemp, Display, TEXT("[%s] CurrentLevel=%s"), Tag, *Name);
+}
+
 FReply ADefenseHUD::OnEndLevelClicked()
 {
+    
+    LogCurrentMap(this, TEXT("BeforeOpenLevel"));
+
     // Load your Endgame map (ensure a level named "Endgame" exists)
-    UGameplayStatics::OpenLevel(this, FName(TEXT("Endgame")));
-    UE_LOG(LogTemp, Verbose, TEXT("This should switch Level"));
+    HideEndLevelButton();
+
+    if (PlayerOwner)
+    {
+        PlayerOwner->bShowMouseCursor = false;
+        PlayerOwner->SetInputMode(FInputModeGameOnly());
+    }
+
+    UGameplayStatics::OpenLevel(this, FName(TEXT("/Game/Maps/Endgame")));
+    LogCurrentMap(this, TEXT("AfterOpenLevel"));
     return FReply::Handled();
 }
 
