@@ -1,119 +1,123 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
+// SSettingsWidget.cpp
 #include "GUI/Slate/SSettingsWidget.h"
+#include "HUD/DefenseHUD.h"
 #include "SlateOptMacros.h"
+
+#include "Widgets/SOverlay.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Input/SButton.h"
+#include "Styling/CoreStyle.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSettingsWidget::Construct(const FArguments& InArgs)
 {
-	//Padding
-	const FMargin ContentPadding = FMargin(500.0f, 300.0f);
-	const FMargin ButtonPadding = FMargin(10.0f);
-	
+	OwnerHUD = InArgs._OwnerHUD;
 
-	//Title
-	FSlateFontInfo TitleTextStyle = FCoreStyle::Get().GetFontStyle("EmbassedText");
-	TitleTextStyle.Size = 45.0f;
+	const FMargin ContentPadding(500.f, 300.f);
+	const FMargin ButtonPadding(10.f);
 
-	const FText TitleText = FText::FromString("Pause Menu");
-
-	//Buttons
-	FSlateFontInfo ButtonTextStyle = TitleTextStyle;
-	ButtonTextStyle.Size = 40.0f;
-	
-	const FText ResumeText = FText::FromString("Resume");
-	const FText SettingsText = FText::FromString("Settings");
-	const FText QuitText = FText::FromString("Quit");
+	// Use a robust font getter that always exists
+	FSlateFontInfo TitleFont = FCoreStyle::GetDefaultFontStyle("Regular", 45);
+	FSlateFontInfo ButtonFont = FCoreStyle::GetDefaultFontStyle("Regular", 40);
 
 	ChildSlot
-			[
+		[
 			SNew(SOverlay)
 
-			+SOverlay::Slot()
-			.HAlign(HAlign_Fill)
-			.VAlign(VAlign_Fill)
-			[
-
-			SNew(SImage)
-				.Image(FCoreStyle::Get().GetBrush("WhiteBrush"))
-				.ColorAndOpacity(FLinearColor(0, 0, 0, 0.8f))
-			]
-
-			//Content
-		+SOverlay::Slot()
-		.HAlign(HAlign_Fill)
-		.VAlign(VAlign_Fill)
-		.Padding(ContentPadding)
-		[	
-			SNew(SVerticalBox)
-
-				+ SVerticalBox::Slot().AutoHeight().Padding(ButtonPadding)
-
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Fill)
 				[
-					SNew(STextBlock)
-						.Font(TitleTextStyle)
-						.Text(TitleText)
-						.Justification(ETextJustify::Center)
+					SNew(SImage)
+						.Image(FCoreStyle::Get().GetBrush("WhiteBrush"))
+						.ColorAndOpacity(FLinearColor(0, 0, 0, 0.8f))
 				]
-				//Resume Button
-				+ SVerticalBox::Slot().AutoHeight().Padding(ButtonPadding)
-					[
-					SNew(SButton)
-					.OnClicked(this,&SSettingsWidget::OnResumeClicked )
-							[
+
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Fill)
+				.Padding(ContentPadding)
+				[
+					SNew(SVerticalBox)
+
+						// Title
+						+ SVerticalBox::Slot()
+						.AutoHeight()
+						.Padding(ButtonPadding)
+						[
 							SNew(STextBlock)
-							.Font(ButtonTextStyle)
-							.Text(ResumeText)
-							.Justification(ETextJustify::Center)
-					]
+								.Font(TitleFont)
+								.Text(FText::FromString(TEXT("Pause Menu")))
+								.Justification(ETextJustify::Center)
+						]
 
-				]
-					//Settings Button
-			+ SVerticalBox::Slot().AutoHeight().Padding(ButtonPadding)
-				[
-					SNew(SButton)
-					.OnClicked(this,&SSettingsWidget::OnSettingsClicked)
-				[
-					SNew(STextBlock)
-					.Font(ButtonTextStyle)
-					.Text(SettingsText)
-					.Justification(ETextJustify::Center)
-				]
-				]
-					//Quit Button
+						// Resume
+						+ SVerticalBox::Slot()
+						.AutoHeight()
+						.Padding(ButtonPadding)
+						[
+							SNew(SButton)
+								.OnClicked(this, &SSettingsWidget::OnResumeClicked)
+								[
+									SNew(STextBlock)
+										.Font(ButtonFont)
+										.Text(FText::FromString(TEXT("Resume")))
+								]
+						]
 
-			+ SVerticalBox::Slot().AutoHeight().Padding(ButtonPadding)
-				[
-					SNew(SButton)
-					.OnClicked(this,&SSettingsWidget::OnQuitClicked)
-				[
-					SNew(STextBlock)
-					.Font(ButtonTextStyle)
-					.Text(QuitText)
-					.Justification(ETextJustify::Center)]
+					// Settings
+					+ SVerticalBox::Slot()
+						.AutoHeight()
+						.Padding(ButtonPadding)
+						[
+							SNew(SButton)
+								.OnClicked(this, &SSettingsWidget::OnSettingsClicked)
+								[
+									SNew(STextBlock)
+										.Font(ButtonFont)
+										.Text(FText::FromString(TEXT("Settings")))
+								]
+						]
+
+					// Quit
+					+ SVerticalBox::Slot()
+						.AutoHeight()
+						.Padding(ButtonPadding)
+						[
+							SNew(SButton)
+								.OnClicked(this, &SSettingsWidget::OnQuitClicked)
+								[
+									SNew(STextBlock)
+										.Font(ButtonFont)
+										.Text(FText::FromString(TEXT("Quit")))
+								]
+						]
 				]
-		]
-	
-	
-	
-		
-	];
-	
+		];
 }
-FReply SSettingsWidget::OnResumeClicked() const
+END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+FReply SSettingsWidget::OnResumeClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Resume Clicked"));
+	UE_LOG(LogTemp, Display, TEXT("Resume Clicked"));
+	if (OwnerHUD.IsValid())
+	{
+		OwnerHUD->HideSettingsMenu();
+		UE_LOG(LogTemp, Warning, TEXT("Settings Menu hidden now"));
+	}
 	return FReply::Handled();
 }
-FReply SSettingsWidget::OnSettingsClicked() const
+
+FReply SSettingsWidget::OnSettingsClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Settings Clicked"));
 	return FReply::Handled();
 }
-FReply SSettingsWidget::OnQuitClicked() const
+
+FReply SSettingsWidget::OnQuitClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Quit Clicked"));
 	return FReply::Handled();
 }
-END_SLATE_FUNCTION_BUILD_OPTIMIZATION

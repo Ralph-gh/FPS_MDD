@@ -1,44 +1,60 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// DefenseHUD.h
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
-#include "GUI/Slate/SSettingsWidget.h"
 #include "DefenseHUD.generated.h"
 
-/**
- * 
- */
+class SSettingsWidget;
+class SWeakWidget;
+
 UCLASS()
 class FPS_MDD_API ADefenseHUD : public AHUD
 {
 	GENERATED_BODY()
+
 public:
-	virtual void DrawHUD() override;
 	virtual void BeginPlay() override;
-	// We'll call this from gameplay code later
+	virtual void DrawHUD() override;
+
+	// Health hook
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void SetBaseHealth(float InCurrent, float InMax);
-	//UTexture2D* CrosshairTexture;
 
-	//Slates Method of Making UI
-	TSharedPtr<class SSettingsWidget> SettingsWidget;
-	TSharedPtr<class SWidget> SlateWidgetContainer;
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ShowEndLevelButton();
 
-	void ShowSettingsMenu();   //Used to show settings menu
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void HideEndLevelButton();
+
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void ToggleEndLevelButton();
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+	bool IsEndLevelButtonVisible() const { return bEndButtonVisible; }
+
+	// Pause menu
+	void ShowSettingsMenu();
 	void HideSettingsMenu();
+	
 
 private:
-	// Temporary demo values
+	// Health bar data
 	float CurrentHealth = 100.f;
 	float MaxHealth = 100.f;
-
-	// Layout
 	FVector2D BarPos = FVector2D(50.f, 50.f);
 	FVector2D BarSize = FVector2D(300.f, 24.f);
+
+	// Slate menu tracking
+	TSharedPtr<SSettingsWidget> SettingsWidget;
+	TSharedPtr<SWeakWidget>     SlateWidgetContainer;
+	bool bSettingsVisible = false;
+	//EndLevel
+	TSharedPtr<SWidget> EndLevelWidget;
+	bool bEndButtonVisible = false;
 	
-	//void DrawHealthBar();
+	FReply OnEndLevelClicked();
+
+	// Draw helpers
 	void DrawRectFilled(const FLinearColor& Color, const FVector2D& Pos, const FVector2D& Size);
 };
-

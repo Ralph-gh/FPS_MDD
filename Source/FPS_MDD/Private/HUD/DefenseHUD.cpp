@@ -1,119 +1,175 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
+// DefenseHUD.cpp
 #include "HUD/DefenseHUD.h"
 #include "GUI/Slate/SSettingsWidget.h"
 #include "Widgets/SWeakWidget.h"
+
 #include "Engine/Canvas.h"
 #include "CanvasItem.h"
+#include "Engine/Engine.h"
+#include "GameFramework/PlayerController.h"
+#include <Kismet/GameplayStatics.h>
+
+void ADefenseHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// For testing, show menu on start
+	ShowSettingsMenu();
+}
 
 void ADefenseHUD::SetBaseHealth(float InCurrent, float InMax)
 {
 	MaxHealth = FMath::Max(1.f, InMax);
 	CurrentHealth = FMath::Clamp(InCurrent, 0.f, MaxHealth);
-
-	
-
 }
-void ADefenseHUD::BeginPlay()
-{
-	Super::BeginPlay();
-
-	ShowSettingsMenu();
-}
-
 
 void ADefenseHUD::ShowSettingsMenu()
 {
-	SettingsWidget = SNew(SSettingsWidget);
-	GEngine-> GameViewport->AddViewportWidgetContent(SAssignNew(SlateWidgetContainer, SWeakWidget).PossiblyNullContent(SettingsWidget.ToSharedRef()));
+    if (bSettingsVisible || !GEngine || !GEngine->GameViewport) return;
 
-	PlayerOwner->bShowMouseCursor = true;
-	PlayerOwner->SetInputMode(FInputModeUIOnly());
+    // Build the widget and add to viewport
+    SettingsWidget = SNew(SSettingsWidget).OwnerHUD(TWeakObjectPtr<ADefenseHUD>(this));
+    SlateWidgetContainer = SNew(SWeakWidget).PossiblyNullContent(SettingsWidget.ToSharedRef());
+    GEngine->GameViewport->AddViewportWidgetContent(SlateWidgetContainer.ToSharedRef());
 
+    if (PlayerOwner)
+    {
+        PlayerOwner->bShowMouseCursor = true;
+        PlayerOwner->SetInputMode(FInputModeUIOnly());
+        PlayerOwner->SetPause(true);
+    }
 
+    bSettingsVisible = true;
 }
 
 void ADefenseHUD::HideSettingsMenu()
 {
-	GEngine->GameViewport->AddViewportWidgetContent(SAssignNew(SlateWidgetContainer, SWeakWidget).PossiblyNullContent(SettingsWidget.ToSharedRef()));
+    if (!bSettingsVisible || !GEngine || !GEngine->GameViewport) return;
 
-	PlayerOwner->bShowMouseCursor = false;
-	PlayerOwner->SetInputMode(FInputModeUIOnly());
+    // Prefer to remove the container we added
+    bool bRemoved = false;
+    if (SlateWidgetContainer.IsValid())
+    {
+        GEngine->GameViewport->RemoveViewportWidgetContent(SlateWidgetContainer.ToSharedRef());
+        bRemoved = true;
+    }
+    else if (SettingsWidget.IsValid())
+    {
+        // If for any reason the container is invalid, try removing the inner widget itself.
+        GEngine->GameViewport->RemoveViewportWidgetContent(SettingsWidget.ToSharedRef());
+        bRemoved = true;
+    }
+
+    // As a safety net (in case it was added more than once), collapse visibility too.
+    if (SettingsWidget.IsValid())
+    {
+        SettingsWidget->SetVisibility(EVisibility::Collapsed);
+    }
+
+    SlateWidgetContainer.Reset();
+    SettingsWidget.Reset();
+
+    if (PlayerOwner)
+    {
+        PlayerOwner->bShowMouseCursor = false;
+        PlayerOwner->SetInputMode(FInputModeGameOnly());
+        PlayerOwner->SetPause(false);
+    }
+
+    bSettingsVisible = false;
+
+    UE_LOG(LogTemp, Display, TEXT("HideSettingsMenu: removed=%d"), bRemoved ? 1 : 0);
 }
 
 void ADefenseHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
-
-	UE_LOG(LogTemp, Warning, TEXT("ADefenseHUD::DrawHUD() called"));
+	UE_LOG(LogTemp, Verbose, TEXT("ADefenseHUD::DrawHUD() called"));
 
 	if (!Canvas) return;
 
-	const float ratio = FMath::Clamp(CurrentHealth / FMath::Max(1.f, MaxHealth), 0.f, 1.f);
-
-	// background
-	DrawRectFilled(FLinearColor(0.f, 0.f, 0.f, 0.6f), BarPos, BarSize);
-
-	// fill
-	DrawRectFilled(FLinearColor(0.1f, 0.8f, 0.2f, 0.9f),
-		BarPos, FVector2D(BarSize.X * ratio, BarSize.Y));
-
-	// label (big so you notice it)
-
-	if (GEngine)
-	{
-		Canvas->DrawText(GEngine->GetLargeFont(),
-			FString::Printf(TEXT("Base %d / %d"),
-				FMath::RoundToInt(CurrentHealth), FMath::RoundToInt(MaxHealth)),
-			BarPos.X, BarPos.Y - 32.f);
-	}
-	//if (!CrosshairTexture) return;
-
-
-	//DrawHealthBar();
-}
-
-/*void ADefenseHUD::DrawHealthBar()
-{
-	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
-	{
-		if (ADefenseHUD* HUD = Cast<ADefenseHUD>(PC->GetHUD()))
-		{
-			HUD->SetBaseHealth(65.f, 100.f); // you should see ~65% bar if you added the bar code
-		}
-	}
-
-	if (!Canvas || MaxHealth <= 0.f) return;
-
-	const float Ratio = FMath::Clamp(CurrentHealth / MaxHealth, 0.f, 1.f);
+	const float Ratio = FMath::Clamp(CurrentHealth / FMath::Max(1.f, MaxHealth), 0.f, 1.f);
 
 	// Background
 	DrawRectFilled(FLinearColor(0.f, 0.f, 0.f, 0.6f), BarPos, BarSize);
 
 	// Fill
-	const FVector2D FillSize(BarSize.X * Ratio, BarSize.Y);
-	DrawRectFilled(FLinearColor(0.1f, 0.8f, 0.2f, 0.9f), BarPos, FillSize);
+	DrawRectFilled(FLinearColor(0.1f, 0.8f, 0.2f, 0.9f),
+		BarPos, FVector2D(BarSize.X * Ratio, BarSize.Y));
 
-	// Border (simple 4 lines using filled rects)
-	DrawRectFilled(FLinearColor::White, BarPos, FVector2D(BarSize.X, Border));                                // Top
-	DrawRectFilled(FLinearColor::White, FVector2D(BarPos.X, BarPos.Y + BarSize.Y - Border), FVector2D(BarSize.X, Border)); // Bottom
-	DrawRectFilled(FLinearColor::White, BarPos, FVector2D(Border, BarSize.Y));                                // Left
-	DrawRectFilled(FLinearColor::White, FVector2D(BarPos.X + BarSize.X - Border, BarPos.Y), FVector2D(Border, BarSize.Y)); // Right
-
-	// Optional label
-	const FString Label = FString::Printf(TEXT("Base %d / %d"),
-		FMath::RoundToInt(CurrentHealth), FMath::RoundToInt(MaxHealth));
-	FCanvasTextItem TextItem(FVector2D(BarPos.X, BarPos.Y - 18.f), FText::FromString(Label), GEngine->GetSmallFont(), FLinearColor::White);
-	TextItem.EnableShadow(FLinearColor::Black);
-	Canvas->DrawItem(TextItem);
-}*/
-
+	// Label
+	if (GEngine)
+	{
+		Canvas->DrawText(
+			GEngine->GetLargeFont(),
+			FString::Printf(TEXT("Base %d / %d"),
+				FMath::RoundToInt(CurrentHealth),
+				FMath::RoundToInt(MaxHealth)),
+			BarPos.X, BarPos.Y - 32.f
+		);
+	}
+}
 
 void ADefenseHUD::DrawRectFilled(const FLinearColor& Color, const FVector2D& Pos, const FVector2D& Size)
 {
 	FCanvasTileItem Tile(Pos, Size, Color);
 	Tile.BlendMode = SE_BLEND_Translucent;
 	Canvas->DrawItem(Tile);
+}
+
+void ADefenseHUD::ShowEndLevelButton()
+{
+    if (bEndButtonVisible || !GEngine || !GEngine->GameViewport) return;
+
+    EndLevelWidget =
+        SNew(SOverlay)
+
+        // top-right aligned slot
+        + SOverlay::Slot()
+        .HAlign(HAlign_Right)
+        .VAlign(VAlign_Top)
+        .Padding(FMargin(12.f))
+        [
+            SNew(SBorder)
+                .Padding(FMargin(8.f, 4.f))
+                .BorderBackgroundColor(FLinearColor(0, 0, 0, 0.6f))
+                [
+                    SNew(SButton)
+                        .OnClicked(FOnClicked::CreateUObject(this, &ADefenseHUD::OnEndLevelClicked))
+                        [
+                            SNew(STextBlock).Text(FText::FromString(TEXT("EndLevel")))
+                        ]
+                ]
+        ];
+
+    // Add exactly this widget (no wrappers)
+    GEngine->GameViewport->AddViewportWidgetContent(EndLevelWidget.ToSharedRef(), 900);
+    bEndButtonVisible = true;
+}
+
+void ADefenseHUD::HideEndLevelButton()
+{
+    if (!bEndButtonVisible || !GEngine || !GEngine->GameViewport) return;
+
+    if (EndLevelWidget.IsValid())
+    {
+        GEngine->GameViewport->RemoveViewportWidgetContent(EndLevelWidget.ToSharedRef());
+    }
+    EndLevelWidget.Reset();
+    bEndButtonVisible = false;
+}
+
+FReply ADefenseHUD::OnEndLevelClicked()
+{
+    // Load your Endgame map (ensure a level named "Endgame" exists)
+    UGameplayStatics::OpenLevel(this, FName(TEXT("Endgame")));
+    UE_LOG(LogTemp, Verbose, TEXT("This should switch Level"));
+    return FReply::Handled();
+}
+
+void ADefenseHUD::ToggleEndLevelButton()
+{
+    if (IsEndLevelButtonVisible()) HideEndLevelButton();
+    else                           ShowEndLevelButton();
 }
