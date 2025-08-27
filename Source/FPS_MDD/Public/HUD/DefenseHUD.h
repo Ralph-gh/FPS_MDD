@@ -56,6 +56,7 @@ private:
 	bool bEndButtonVisible = false;
 	
 	FReply OnEndLevelClicked();
+	
 
 	// Draw helpers
 	void DrawRectFilled(const FLinearColor& Color, const FVector2D& Pos, const FVector2D& Size);

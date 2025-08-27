@@ -9,6 +9,7 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Input/SButton.h"
 #include "Styling/CoreStyle.h"
+#include <Kismet/KismetSystemLibrary.h>
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSettingsWidget::Construct(const FArguments& InArgs)
@@ -119,5 +120,15 @@ FReply SSettingsWidget::OnSettingsClicked()
 FReply SSettingsWidget::OnQuitClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Quit Clicked"));
+	if (OwnerHUD.IsValid())
+	{
+		// This stops PIE in-editor; quits app in packaged builds
+		UKismetSystemLibrary::QuitGame(
+			OwnerHUD->GetWorld(),
+			OwnerHUD->PlayerOwner,   // uses your PlayerController
+			EQuitPreference::Quit,
+			/*bIgnorePlatformRestrictions*/ false
+		);
+	}
 	return FReply::Handled();
 }

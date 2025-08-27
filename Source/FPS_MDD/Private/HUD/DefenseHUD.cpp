@@ -214,3 +214,4 @@ void ADefenseHUD::ToggleEndLevelButton()
     if (IsEndLevelButtonVisible()) HideEndLevelButton();
     else                           ShowEndLevelButton();
 }
+
