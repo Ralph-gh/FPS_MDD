@@ -7,6 +7,7 @@
 
 class SSettingsWidget;
 class SWeakWidget;
+class SMainMenuWidget; // <-- forward declare
 
 UCLASS()
 class FPS_MDD_API ADefenseHUD : public AHUD
@@ -17,28 +18,23 @@ public:
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;
 
-	bool bShowGameEnded = false;//flag for Endgame
-
 	// Health hook
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void SetBaseHealth(float InCurrent, float InMax);
 
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void ShowEndLevelButton();
+	// EndLevel UI
+	UFUNCTION(BlueprintCallable, Category = "HUD") void ShowEndLevelButton();
+	UFUNCTION(BlueprintCallable, Category = "HUD") void HideEndLevelButton();
+	UFUNCTION(BlueprintCallable, Category = "HUD") void ToggleEndLevelButton();
+	UFUNCTION(BlueprintPure, Category = "HUD") bool IsEndLevelButtonVisible() const { return bEndButtonVisible; }
 
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void HideEndLevelButton();
-
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void ToggleEndLevelButton();
-
-	UFUNCTION(BlueprintPure, Category = "HUD")
-	bool IsEndLevelButtonVisible() const { return bEndButtonVisible; }
-
-	// Pause menu
+	// Settings (pause) menu – call this from input (Esc), not automatically on BeginPlay.
 	void ShowSettingsMenu();
 	void HideSettingsMenu();
-	
+
+	// Main menu (dedicated MainMenu level only)
+	void ShowMainMenu();
+	void HideMainMenu();
 
 private:
 	// Health bar data
@@ -47,16 +43,23 @@ private:
 	FVector2D BarPos = FVector2D(50.f, 50.f);
 	FVector2D BarSize = FVector2D(300.f, 24.f);
 
-	// Slate menu tracking
+	// Settings/pause tracking
 	TSharedPtr<SSettingsWidget> SettingsWidget;
 	TSharedPtr<SWeakWidget>     SlateWidgetContainer;
 	bool bSettingsVisible = false;
-	//EndLevel
+
+	// EndLevel button
 	TSharedPtr<SWidget> EndLevelWidget;
 	bool bEndButtonVisible = false;
-	
 	FReply OnEndLevelClicked();
-	
+
+	// Main menu tracking
+	TSharedPtr<SMainMenuWidget> MainMenuWidget;
+	TSharedPtr<SWeakWidget>     MainMenuContainer;
+	bool bMainMenuVisible = false;
+
+	// End screen flag
+	bool bShowGameEnded = false;
 
 	// Draw helpers
 	void DrawRectFilled(const FLinearColor& Color, const FVector2D& Pos, const FVector2D& Size);
