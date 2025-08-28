@@ -23,14 +23,20 @@ void AFPSProjectGameModeBase::StartPlay()
 
         UE_LOG(LogTemp, Warning, TEXT("After ClientSetHUD -> HUD = %s"), *GetNameSafe(PC->GetHUD()));
         if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("ClientSetHUD called"));*/
+
+
+        if (ADefenseHUD* HUD = PC->GetHUD<ADefenseHUD>())
+        {
+            HUD->SetWave(1);   // shows "Wave 1"
+        }
     }
 
     // 1. To print to screen
-    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Hello World, this is FPSGameModeBase! RG message"));
+   // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Hello World, this is FPSGameModeBase! RG message"));
   
-    int TestNumber = 10;
-    bool BoolTest = false;
-    FString NameTest = ("Your string here");
+   // int TestNumber = 10;
+   // bool BoolTest = false;
+    //FString NameTest = ("Your string here");
 
 }
 

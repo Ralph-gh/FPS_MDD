@@ -44,10 +44,16 @@ public:
 	void HideEndgameMenu();
 	bool IsEndgameMenuVisible() const { return bEndgameMenuVisible; }
 
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void SetWave(int32 InWave) { CurrentWave = FMath::Max(1, InWave); }//print wave number on screen
+
 private:
 	// Health bar data
 	float CurrentHealth = 100.f;
 	float MaxHealth = 100.f;
+
+	int32 CurrentWave = 1; //wave number
+
 	FVector2D BarPos = FVector2D(50.f, 50.f);
 	FVector2D BarSize = FVector2D(300.f, 24.f);
 

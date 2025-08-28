@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GUI/Slate/SEndgameMenuWidget.h"
+
 void ADefenseHUD::BeginPlay()
 {
 	Super::BeginPlay();
@@ -110,13 +111,33 @@ void ADefenseHUD::DrawHUD()
 	DrawRectFilled(FLinearColor(0.f, 0.f, 0.f, 0.6f), BarPos, BarSize);
 	DrawRectFilled(FLinearColor(0.1f, 0.8f, 0.2f, 0.9f), BarPos, FVector2D(BarSize.X * Ratio, BarSize.Y));
 
-	if (GEngine)
+	UFont* Font = GEngine ? GEngine->GetLargeFont() : nullptr;
+	const float Dpi = Canvas->ClipY / 1080.f;
+
+	// ---- Big "Base xx / yy" above the bar ----
 	{
-		Canvas->DrawText(GEngine->GetLargeFont(),
-			FString::Printf(TEXT("Base %d / %d"),
-				FMath::RoundToInt(CurrentHealth),
-				FMath::RoundToInt(MaxHealth)),
-			BarPos.X, BarPos.Y - 32.f);
+		const FString BaseText = FString::Printf(
+			TEXT("Base %d / %d"),
+			FMath::RoundToInt(CurrentHealth),
+			FMath::RoundToInt(MaxHealth)
+		);
+
+		FCanvasTextItem BaseItem(FVector2D::ZeroVector, FText::FromString(BaseText), Font, FLinearColor::White);
+		BaseItem.EnableShadow(FLinearColor::Black);
+		BaseItem.Scale = FVector2D(2.0f * Dpi, 2.0f * Dpi);   // bigger than default
+		const FVector2D BasePos(BarPos.X, BarPos.Y + 60.f);   // a bit higher than the bar
+		Canvas->DrawItem(BaseItem, BasePos);
+	}
+
+	// ---- "Wave N" under the bar ----
+	{
+		const FString WaveText = FString::Printf(TEXT("Wave %d"), CurrentWave);
+
+		FCanvasTextItem WaveItem(FVector2D::ZeroVector, FText::FromString(WaveText), Font, FLinearColor::Yellow);
+		WaveItem.EnableShadow(FLinearColor::Black);
+		WaveItem.Scale = FVector2D(1.4f * Dpi, 1.4f * Dpi);
+		const FVector2D WavePos(BarPos.X, BarPos.Y + BarSize.Y + 0.0f); // just below the bar
+		Canvas->DrawItem(WaveItem, WavePos);
 	}
 }
 
