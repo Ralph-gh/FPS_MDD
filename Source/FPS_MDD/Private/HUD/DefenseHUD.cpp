@@ -8,7 +8,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "GUI/Slate/SEndgameMenuWidget.h"
 void ADefenseHUD::BeginPlay()
 {
 	Super::BeginPlay();
@@ -26,7 +26,7 @@ void ADefenseHUD::BeginPlay()
 	if (Map.Equals(TEXT("Endgame"), ESearchCase::IgnoreCase))
 	{
 		bShowGameEnded = true; // DrawHUD will early-return after painting end text
-		ShowMainMenu();               // <-- show the Play/Quit menu on game end too
+		ShowEndgameMenu();               // <-- show the Play/Quit menu on game end too
 		return;
 	}
 
@@ -244,4 +244,48 @@ void ADefenseHUD::ToggleSettingsMenu()
 {
 	if (bSettingsVisible)  HideSettingsMenu();
 	else                   ShowSettingsMenu();
+}
+void ADefenseHUD::ShowEndgameMenu()
+{
+	if (bEndgameMenuVisible || !GEngine || !GEngine->GameViewport) return;
+
+	// If settings/main menu still up, hide them
+	if (bSettingsVisible) HideSettingsMenu();
+
+	EndgameMenuWidget = SNew(SEndgameMenuWidget).OwnerHUD(TWeakObjectPtr<ADefenseHUD>(this));
+
+	TSharedRef<SWidget> AsWidget = StaticCastSharedRef<SWidget>(EndgameMenuWidget.ToSharedRef());
+	EndgameMenuContainer = SNew(SWeakWidget).PossiblyNullContent(AsWidget);
+
+	GEngine->GameViewport->AddViewportWidgetContent(EndgameMenuContainer.ToSharedRef());
+
+	if (PlayerOwner)
+	{
+		PlayerOwner->bShowMouseCursor = true;
+		PlayerOwner->SetInputMode(FInputModeUIOnly());
+		PlayerOwner->SetPause(true);
+	}
+
+	bEndgameMenuVisible = true;
+}
+
+void ADefenseHUD::HideEndgameMenu()
+{
+	if (!bEndgameMenuVisible || !GEngine || !GEngine->GameViewport) return;
+
+	if (EndgameMenuContainer.IsValid())
+	{
+		GEngine->GameViewport->RemoveViewportWidgetContent(EndgameMenuContainer.ToSharedRef());
+	}
+	EndgameMenuContainer.Reset();
+	EndgameMenuWidget.Reset();
+
+	if (PlayerOwner)
+	{
+		PlayerOwner->bShowMouseCursor = false;
+		PlayerOwner->SetInputMode(FInputModeGameOnly());
+		PlayerOwner->SetPause(false);
+	}
+
+	bEndgameMenuVisible = false;
 }

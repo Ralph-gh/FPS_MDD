@@ -8,6 +8,7 @@
 class SSettingsWidget;
 class SWeakWidget;
 class SMainMenuWidget; // <-- forward declare
+class SEndgameMenuWidget;  // forward declare
 
 UCLASS()
 class FPS_MDD_API ADefenseHUD : public AHUD
@@ -39,6 +40,10 @@ public:
 	void ToggleSettingsMenu();      
 	bool IsMainMenuVisible() const { return bMainMenuVisible; }
 
+	void ShowEndgameMenu();
+	void HideEndgameMenu();
+	bool IsEndgameMenuVisible() const { return bEndgameMenuVisible; }
+
 private:
 	// Health bar data
 	float CurrentHealth = 100.f;
@@ -60,6 +65,11 @@ private:
 	TSharedPtr<SMainMenuWidget> MainMenuWidget;
 	TSharedPtr<SWeakWidget>     MainMenuContainer;
 	bool bMainMenuVisible = false;
+
+	//EndgameMenu
+	TSharedPtr<SEndgameMenuWidget> EndgameMenuWidget;
+	TSharedPtr<class SWeakWidget>  EndgameMenuContainer;
+	bool bEndgameMenuVisible = false;
 
 	// End screen flag
 	bool bShowGameEnded = false;
