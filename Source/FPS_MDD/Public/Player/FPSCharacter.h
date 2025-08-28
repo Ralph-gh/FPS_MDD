@@ -7,7 +7,7 @@
 #include "FPSCharacter.generated.h"
 
 class AFPSProjectile;
-
+class ADefenseHUD;  
 UCLASS()
 class FPS_MDD_API AFPSCharacter : public ACharacter
 {
@@ -34,7 +34,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	
+	UFUNCTION()
+	void ToggleMenu();
 
 	UFUNCTION()
 	void MoveForward(float value);

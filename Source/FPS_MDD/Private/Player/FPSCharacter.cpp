@@ -2,6 +2,7 @@
 
 
 #include "Player/FPSCharacter.h"
+#include "HUD/DefenseHUD.h"   
 #include "DrawDebugHelpers.h"
 #include "Projectile/FPSProjectile.h"
 #include "Engine/Engine.h"
@@ -62,6 +63,8 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AFPSCharacter::EndJump);
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
+
+	PlayerInputComponent->BindKey(EKeys::O, IE_Pressed, this, &AFPSCharacter::ToggleMenu);
 
 }
 
@@ -183,5 +186,20 @@ void AFPSCharacter::Fire()
 	// Launch spawned projectile in the camera rotation
 	FVector LaunchDirection = MuzzleRotation.Vector();
 	Projectile->FireInDirection(LaunchDirection);*/
+}
+
+void AFPSCharacter::ToggleMenu()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		// Either way works — pick one:
+
+		// A) Using the templated getter (needs the include above)
+		if (ADefenseHUD* HUD = PC->GetHUD<ADefenseHUD>())
+		{
+			HUD->ToggleSettingsMenu();   // <-- call settings toggle (not main menu)
+		}
+
+	}
 }
 

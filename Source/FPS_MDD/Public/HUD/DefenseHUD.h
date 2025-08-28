@@ -36,6 +36,9 @@ public:
 	void ShowMainMenu();
 	void HideMainMenu();
 
+	void ToggleSettingsMenu();      
+	bool IsMainMenuVisible() const { return bMainMenuVisible; }
+
 private:
 	// Health bar data
 	float CurrentHealth = 100.f;

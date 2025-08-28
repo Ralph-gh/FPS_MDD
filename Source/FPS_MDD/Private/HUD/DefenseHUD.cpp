@@ -26,6 +26,7 @@ void ADefenseHUD::BeginPlay()
 	if (Map.Equals(TEXT("Endgame"), ESearchCase::IgnoreCase))
 	{
 		bShowGameEnded = true; // DrawHUD will early-return after painting end text
+		ShowMainMenu();               // <-- show the Play/Quit menu on game end too
 		return;
 	}
 
@@ -95,12 +96,12 @@ void ADefenseHUD::DrawHUD()
 	if (bShowGameEnded)
 	{
 		UFont* Font = GEngine ? GEngine->GetLargeFont() : nullptr;
-		FCanvasTextItem Item(FVector2D::ZeroVector, FText::FromString(TEXT("GAME ENDED")), Font, FLinearColor::Red);
+		FCanvasTextItem Item(FVector2D::ZeroVector, FText::FromString(TEXT("Game Over")), Font, FLinearColor::Red);
 		Item.EnableShadow(FLinearColor::Black);
 		Item.Scale = FVector2D(7.5f * (Canvas->ClipY / 1080.f));
 		Item.bCentreX = true;
 		Item.bCentreY = true;
-		Canvas->DrawItem(Item, FVector2D(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f));
+		Canvas->DrawItem(Item, FVector2D(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.9f));
 		return; // Skip other HUD when showing end screen
 	}
 
@@ -237,4 +238,10 @@ void ADefenseHUD::HideMainMenu()
 	}
 
 	bMainMenuVisible = false;
+}
+
+void ADefenseHUD::ToggleSettingsMenu()
+{
+	if (bSettingsVisible)  HideSettingsMenu();
+	else                   ShowSettingsMenu();
 }
