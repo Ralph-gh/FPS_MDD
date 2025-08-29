@@ -30,12 +30,17 @@ AFPSProjectile::AFPSProjectile()
     Collision->OnComponentHit.AddDynamic(this, &AFPSProjectile::OnHit);
 }
 
-void AFPSProjectile::OnHit(UPrimitiveComponent*, AActor* OtherActor,
-    UPrimitiveComponent*, FVector , const FHitResult&)
+UFUNCTION()
+void AFPSProjectile::OnHit(
+    UPrimitiveComponent* HitComp,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    FVector NormalImpulse,
+    const FHitResult& Hit)
 {
-    if (OtherActor && OtherActor != GetOwner())
-    {
-        Destroy();
-    }
+    
+        // Fallback: just destroy the enemy actor if you’re not using health yet
+         OtherActor->Destroy();
+    // Destroy the projectile on impact
+    Destroy();
 }
-
