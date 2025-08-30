@@ -1,4 +1,3 @@
-// HealthComponent.h
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,20 +12,14 @@ class FPS_MDD_API UHealthComponent : public UActorComponent
 public:
 	UHealthComponent();
 
-	// --- Data ---
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (ClampMin = "1.0"))
+	// Exposed properties
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (ClampMin = "1.0"))
 	float MaxHealth = 100.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth = 100.f;
 
-	// --- Helpers ---
-	UFUNCTION(BlueprintPure, Category = "Health")
-	float GetHealthPercent() const
-	{
-		return MaxHealth > 0.f ? CurrentHealth / MaxHealth : 0.f;
-	}
-
+	// --- API ---
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void SetMaxHealth(float NewMax);
 
@@ -34,7 +27,10 @@ public:
 	void Heal(float Amount);
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	void Damage(float Amount); // subtract health (positive Amount reduces)
+	void ApplyDamage(float Amount);
+
+	UFUNCTION(BlueprintPure, Category = "Health")
+	bool IsDead() const { return CurrentHealth <= 0.f; }
 
 protected:
 	virtual void BeginPlay() override;

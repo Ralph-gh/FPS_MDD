@@ -58,6 +58,6 @@ void ADefenseBase::BaseHeal(float Amount)
 void ADefenseBase::BaseDamage(float Amount)
 {
 	if (!Health) return;
-	Health->Damage(Amount);
+	Health->ApplyDamage(Amount);
 	UpdateHUD();
 }

@@ -91,6 +91,38 @@ void ADefenseHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
+	if (!bShowCrosshair || !Canvas) return;
+
+	const float CX = Canvas->ClipX * 0.5f;
+	const float CY = Canvas->ClipY * 0.5f;
+
+	if (CrosshairTexture)
+	{
+		// --- Texture version ---
+		const float TexW = CrosshairTexture->GetSizeX() * CrosshairTexScale;
+		const float TexH = CrosshairTexture->GetSizeY() * CrosshairTexScale;
+
+		const FVector2D DrawPos(CX - TexW * 0.5f, CY - TexH * 0.5f);
+		FCanvasTileItem Tile(DrawPos, CrosshairTexture->GetResource(), FVector2D(TexW, TexH), CrosshairColor);
+		Tile.BlendMode = SE_BLEND_Translucent; // so PNG alpha works
+		Canvas->DrawItem(Tile);
+	}
+	else
+	{
+		// --- Line-drawn version (no texture required) ---
+		const float Gap = CrosshairGap;
+		const float Arm = CrosshairArm;
+		const float T = CrosshairThickness;
+
+		// Horizontal
+		Canvas->K2_DrawLine(FVector2D(CX - Gap - Arm, CY), FVector2D(CX - Gap, CY), T, CrosshairColor);
+		Canvas->K2_DrawLine(FVector2D(CX + Gap, CY), FVector2D(CX + Gap + Arm, CY), T, CrosshairColor);
+
+		// Vertical
+		Canvas->K2_DrawLine(FVector2D(CX, CY - Gap - Arm), FVector2D(CX, CY - Gap), T, CrosshairColor);
+		Canvas->K2_DrawLine(FVector2D(CX, CY + Gap), FVector2D(CX, CY + Gap + Arm), T, CrosshairColor);
+	}
+
 	if (!Canvas) return;
 
 	// Endgame big text overlay

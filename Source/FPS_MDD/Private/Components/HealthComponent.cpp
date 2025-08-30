@@ -1,10 +1,9 @@
-// HealthComponent.cpp
 #include "Components/HealthComponent.h"
+#include "GameFramework/Actor.h"
 
 UHealthComponent::UHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	CurrentHealth = MaxHealth;
 }
 
 void UHealthComponent::BeginPlay()
@@ -21,12 +20,20 @@ void UHealthComponent::SetMaxHealth(float NewMax)
 
 void UHealthComponent::Heal(float Amount)
 {
-	if (Amount <= 0.f || CurrentHealth <= 0.f) return;
+	if (Amount <= 0.f) return;
 	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.f, MaxHealth);
 }
 
-void UHealthComponent::Damage(float Amount)
+void UHealthComponent::ApplyDamage(float Amount)
 {
-	if (Amount <= 0.f || CurrentHealth <= 0.f) return;
+	if (Amount <= 0.f) return;
 	CurrentHealth = FMath::Clamp(CurrentHealth - Amount, 0.f, MaxHealth);
+
+	if (IsDead())
+	{
+		if (AActor* Owner = GetOwner())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s has died"), *Owner->GetName());
+		}
+	}
 }

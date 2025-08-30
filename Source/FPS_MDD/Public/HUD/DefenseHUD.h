@@ -47,6 +47,37 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void SetWave(int32 InWave) { CurrentWave = FMath::Max(1, InWave); }//print wave number on screen
 
+	// --- Crosshair options ---
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
+	bool bShowCrosshair = true;
+
+	// Size of each arm of the crosshair in pixels (only for line-drawn mode)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair", meta = (ClampMin = "2.0", ClampMax = "100.0"))
+	float CrosshairArm = 10.f;
+
+	// Gap around the center (line-drawn mode)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair", meta = (ClampMin = "0.0", ClampMax = "50.0"))
+	float CrosshairGap = 4.f;
+
+	// Line thickness (line-drawn mode)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair", meta = (ClampMin = "0.5", ClampMax = "8.0"))
+	float CrosshairThickness = 2.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
+	FLinearColor CrosshairColor = FLinearColor::White;
+
+	// Optional: assign a texture to use a PNG reticle instead of lines
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")
+	TObjectPtr<UTexture2D> CrosshairTexture = nullptr;
+
+	// Scale the texture (if using CrosshairTexture)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair", meta = (ClampMin = "0.05", ClampMax = "5.0"))
+	float CrosshairTexScale = 1.0f;
+
+	// Helper to enable/disable from other classes (e.g., while a menu is open)
+	UFUNCTION(BlueprintCallable, Category = "Crosshair")
+	void SetCrosshairVisible(bool bVisible) { bShowCrosshair = bVisible; }
+
 private:
 	// Health bar data
 	float CurrentHealth = 100.f;
@@ -82,4 +113,5 @@ private:
 
 	// Draw helpers
 	void DrawRectFilled(const FLinearColor& Color, const FVector2D& Pos, const FVector2D& Size);
+
 };

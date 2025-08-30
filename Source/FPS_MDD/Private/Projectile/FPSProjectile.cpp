@@ -38,9 +38,13 @@ void AFPSProjectile::OnHit(
     FVector NormalImpulse,
     const FHitResult& Hit)
 {
-    
-        // Fallback: just destroy the enemy actor if you’re not using health yet
-         OtherActor->Destroy();
+    if (OtherActor->ActorHasTag("Enemy"))
+    {
+        UE_LOG(LogTemp, Log, TEXT("Projectile hit Enemy: %s"), *OtherActor->GetName());
+
+        // Destroy the enemy actor
+        OtherActor->Destroy();
+    }
     // Destroy the projectile on impact
     Destroy();
 }
