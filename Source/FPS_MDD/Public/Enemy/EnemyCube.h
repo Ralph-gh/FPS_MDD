@@ -28,7 +28,7 @@ private:
 
 	// Movement
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (ClampMin = "0.0"))
-	float MoveSpeed = 80.f;
+	float MoveSpeed = 200.f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (ClampMin = "0.0"))
 	float AcceptanceRadius = 50.f;

@@ -50,60 +50,54 @@ void AEnemyCube::BeginPlay()
 void AEnemyCube::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
 	if (!IsValid(TargetActor)) return;
 
-	const FVector MyLoc = GetActorLocation();
-	const FVector TargetLoc = TargetActor->GetActorLocation();
-	const FVector ToTarget = TargetLoc - MyLoc;
-	const float Dist = ToTarget.Size();
+	const FVector dir = (TargetActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	const FVector step = dir * MoveSpeed * DeltaSeconds;
 
-	// If close enough, apply damage and self-destruct even if we didn't physically collide
-	if (Dist <= AcceptanceRadius)
+	FHitResult hit;
+	AddActorWorldOffset(step, /*bSweep=*/true, &hit);
+
+	if (hit.IsValidBlockingHit())
 	{
-		if (UHealthComponent* HC = TargetActor->FindComponentByClass<UHealthComponent>())
+		// If we hit the base (by tag), LOG and DESTROY
+		if (AActor* hitActor = hit.GetActor())
 		{
-			HC->ApplyDamage(DamageOnImpact);
+			if (hitActor->ActorHasTag(TargetTag))   // TargetTag default = "DefenseBase"
+			{
+				UE_LOG(LogTemp, Warning, TEXT("EnemyCube: Dealt %.0f damage to BASE (log only)"), DamageOnImpact);
+				Destroy();
+				return;
+			}
 		}
-		Destroy();
-		return;
-	}
 
-	// Move toward target with sweep + slide
-	const FVector Dir = ToTarget.GetSafeNormal();
-	const FVector Step = Dir * MoveSpeed * DeltaSeconds;
-
-	FHitResult Hit;
-	AddActorWorldOffset(Step, true, &Hit);
-
-	if (Hit.IsValidBlockingHit())
-	{
-		const FVector Slide = FVector::VectorPlaneProject(Step, Hit.Normal);
-		if (!Slide.IsNearlyZero())
+		// otherwise, slide along the surface
+		const FVector slide = FVector::VectorPlaneProject(step, hit.Normal);
+		if (!slide.IsNearlyZero())
 		{
-			AddActorWorldOffset(Slide, true);
+			AddActorWorldOffset(slide, true);
 		}
 	}
 
-	// (Optional flair)
-	// AddActorLocalRotation(FRotator(0.f, 50.f * DeltaSeconds, 0.f));
+	AddActorLocalRotation(FRotator(0.f, 50.f * DeltaSeconds, 0.f));
 }
 
-void AEnemyCube::OnHit(UPrimitiveComponent* /*HitComp*/, AActor* OtherActor,
-	UPrimitiveComponent* /*OtherComp*/, FVector /*NormalImpulse*/, const FHitResult& /*Hit*/)
+void AEnemyCube::OnHit(UPrimitiveComponent* , AActor* OtherActor,
+	UPrimitiveComponent* , FVector , const FHitResult& )
 {
 	if (!OtherActor || OtherActor == this) return;
 
 	if (UHealthComponent* HC = OtherActor->FindComponentByClass<UHealthComponent>())
 	{
 		HC->ApplyDamage(DamageOnImpact);
+		UE_LOG(LogTemp, Warning, TEXT("EnemyCube: Dealt %.0f damage to Base (log only)"), DamageOnImpact);
 		Destroy();
 	}
 }
 
-void AEnemyCube::OnOverlap(UPrimitiveComponent* /*OverlappedComp*/, AActor* OtherActor,
-	UPrimitiveComponent* /*OtherComp*/, int32 /*OtherBodyIndex*/, bool /*bFromSweep*/,
-	const FHitResult& /*SweepResult*/)
+void AEnemyCube::OnOverlap(UPrimitiveComponent* , AActor* OtherActor,
+	UPrimitiveComponent* , int32 , bool ,
+	const FHitResult& )
 {
 	// Only used if you switch to overlap logic:
 	if (!OtherActor || OtherActor == this) return;
@@ -111,6 +105,7 @@ void AEnemyCube::OnOverlap(UPrimitiveComponent* /*OverlappedComp*/, AActor* Othe
 	if (UHealthComponent* HC = OtherActor->FindComponentByClass<UHealthComponent>())
 	{
 		HC->ApplyDamage(DamageOnImpact);
+		UE_LOG(LogTemp, Warning, TEXT("EnemyCube: Dealt %.0f damage to Base (log only)"), DamageOnImpact);
 		Destroy();
 	}
 }
