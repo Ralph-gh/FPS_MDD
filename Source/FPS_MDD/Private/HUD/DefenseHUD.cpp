@@ -91,7 +91,7 @@ void ADefenseHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
-	if (!bShowCrosshair || !Canvas) return;
+	if (!Canvas) return;
 
 	const float CX = Canvas->ClipX * 0.5f;
 	const float CY = Canvas->ClipY * 0.5f;
@@ -150,9 +150,7 @@ void ADefenseHUD::DrawHUD()
 	{
 		const FString BaseText = FString::Printf(
 			TEXT("Base %d / %d"),
-			FMath::RoundToInt(CurrentHealth),
-			FMath::RoundToInt(MaxHealth)
-		);
+			FMath::RoundToInt(CurrentHealth),FMath::RoundToInt(MaxHealth));
 
 		FCanvasTextItem BaseItem(FVector2D::ZeroVector, FText::FromString(BaseText), Font, FLinearColor::White);
 		BaseItem.EnableShadow(FLinearColor::Black);
@@ -160,12 +158,13 @@ void ADefenseHUD::DrawHUD()
 		const FVector2D BasePos(BarPos.X, BarPos.Y + 60.f);   // a bit higher than the bar
 		Canvas->DrawItem(BaseItem, BasePos);
 
-		// --- Score label (NEW) ---
-		Canvas->DrawText(
-			GEngine->GetLargeFont(),
-			FString::Printf(TEXT("Score: %d"), CurrentScore),
-			BarPos.X, BarPos.Y + BarSize.Y + 12.f // just under the bar
-		);
+		// --- Score label (explicit style) ---
+		const FString ScoreText = FString::Printf(TEXT("Score: %d"), CurrentScore);
+		FCanvasTextItem ScoreItem(FVector2D::ZeroVector, FText::FromString(ScoreText), Font, FLinearColor::White);
+		ScoreItem.EnableShadow(FLinearColor::Black);
+		ScoreItem.Scale = FVector2D(1.6f * Dpi, 1.6f * Dpi);
+		const FVector2D ScorePos(BarPos.X, BarPos.Y + BarSize.Y + 18.f);
+		Canvas->DrawItem(ScoreItem, ScorePos);
 	}
 
 	// ---- "Wave N" under the bar ----
