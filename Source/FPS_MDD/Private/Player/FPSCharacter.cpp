@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "Projectile/FPSProjectile.h"
 #include "Engine/Engine.h"
+#include <AFPSProjectGameModeBase.h>
 // Sets default values
 AFPSCharacter::AFPSCharacter()
 {
@@ -65,6 +66,8 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
 
 	PlayerInputComponent->BindKey(EKeys::O, IE_Pressed, this, &AFPSCharacter::ToggleMenu);
+
+	PlayerInputComponent->BindAction("ToggleDimension", IE_Pressed, this, &AFPSCharacter::ToggleDimensionPressed);
 
 }
 
@@ -202,4 +205,13 @@ void AFPSCharacter::ToggleMenu()
 
 	}
 }
-
+void AFPSCharacter::ToggleDimensionPressed()
+{
+	if (UWorld* W = GetWorld())
+	{
+		if (AFPSProjectGameModeBase* GM = W->GetAuthGameMode<AFPSProjectGameModeBase>())
+		{
+			//GM->ToggleDimension();
+		}
+	}
+}

@@ -37,6 +37,8 @@ public:
 	UFUNCTION()
 	void ToggleMenu();
 
+	void ToggleDimensionPressed();
+
 	UFUNCTION()
 	void MoveForward(float value);
 
