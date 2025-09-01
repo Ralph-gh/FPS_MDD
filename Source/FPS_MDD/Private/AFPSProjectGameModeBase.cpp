@@ -2,12 +2,14 @@
 
 
 #include "AFPSProjectGameModeBase.h"
+#include "Components/DimensionComponent.h"
 #include "HUD/DefenseHUD.h"  
 #include "Engine/Engine.h"
 
 void AFPSProjectGameModeBase::StartPlay()
 {
     Super::StartPlay();
+    BroadcastDimension(); // ensure initial state applied
 
     check(GEngine != nullptr);
 
@@ -59,6 +61,51 @@ void AFPSProjectGameModeBase::AddScore(int32 Amount)
         if (ADefenseHUD* HUD = PC ? Cast<ADefenseHUD>(PC->GetHUD()) : nullptr)
         {
             HUD->SetScore(Score);
+        }
+    }
+}
+
+void AFPSProjectGameModeBase::ToggleDimension()
+{
+    SetCurrentDimension(CurrentDimension == EDefenseDimension::Normal
+        ? EDefenseDimension::Shadow
+        : EDefenseDimension::Normal);
+}
+
+void AFPSProjectGameModeBase::SetCurrentDimension(EDefenseDimension NewDim)
+{
+    if (CurrentDimension == NewDim) return;
+    CurrentDimension = NewDim;
+    BroadcastDimension();
+
+    UE_LOG(LogTemp, Log, TEXT("Dimension switched to: %s"),
+        (NewDim == EDefenseDimension::Normal ? TEXT("Normal") : TEXT("Shadow")));
+}
+
+void AFPSProjectGameModeBase::RegisterDimensionComponent(UDimensionComponent* Comp)
+{
+    if (!Comp) return;
+    RegisteredComponents.Add(Comp);
+    Comp->ApplyForDimension(CurrentDimension);
+}
+
+void AFPSProjectGameModeBase::UnregisterDimensionComponent(UDimensionComponent* Comp)
+{
+    if (!Comp) return;
+    RegisteredComponents.Remove(Comp);
+}
+
+void AFPSProjectGameModeBase::BroadcastDimension()
+{
+    for (auto It = RegisteredComponents.CreateIterator(); It; ++It)
+    {
+        if (UDimensionComponent* Comp = It->Get())
+        {
+            Comp->ApplyForDimension(CurrentDimension);
+        }
+        else
+        {
+            It.RemoveCurrent();
         }
     }
 }

@@ -211,7 +211,11 @@ void AFPSCharacter::ToggleDimensionPressed()
 	{
 		if (AFPSProjectGameModeBase* GM = W->GetAuthGameMode<AFPSProjectGameModeBase>())
 		{
-			//GM->ToggleDimension();
+			GM->ToggleDimension();
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Yellow, TEXT("Toggle pressed"));
+			}
 		}
 	}
 }

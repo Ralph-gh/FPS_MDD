@@ -1,27 +1,60 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Components/DimensionComponent.h"
+#include "AFPSProjectGameModeBase.h"
+#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 
-// Sets default values
-ADimensionComponent::ADimensionComponent()
+UDimensionComponent::UDimensionComponent()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+    PrimaryComponentTick.bCanEverTick = false;
 }
 
-// Called when the game starts or when spawned
-void ADimensionComponent::BeginPlay()
+void UDimensionComponent::BeginPlay()
 {
-	Super::BeginPlay();
-	
+    Super::BeginPlay();
+    RegisterWithManager();
 }
 
-// Called every frame
-void ADimensionComponent::Tick(float DeltaTime)
+void UDimensionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::Tick(DeltaTime);
-
+    UnregisterFromManager();
+    Super::EndPlay(EndPlayReason);
 }
 
+void UDimensionComponent::RegisterWithManager()
+{
+    if (UWorld* W = GetWorld())
+    {
+        if (AFPSProjectGameModeBase* GM = W->GetAuthGameMode<AFPSProjectGameModeBase>())
+        {
+            CachedGM = GM;
+            GM->RegisterDimensionComponent(this);
+
+            // Immediately conform to current dimension on spawn
+            ApplyForDimension(GM->GetCurrentDimension());
+        }
+    }
+}
+
+void UDimensionComponent::UnregisterFromManager()
+{
+    if (CachedGM.IsValid())
+    {
+        CachedGM->UnregisterDimensionComponent(this);
+    }
+}
+
+void UDimensionComponent::ApplyForDimension(EDefenseDimension Active) const
+{
+    AActor* Owner = GetOwner();
+    if (!Owner) return;
+
+    const bool bVisible = (Active == Dimension);
+
+    Owner->SetActorHiddenInGame(!bVisible);
+
+    if (bDisableCollisionAndTickWhenHidden)
+    {
+        Owner->SetActorEnableCollision(bVisible);
+        Owner->SetActorTickEnabled(bVisible);
+    }
+}
