@@ -4,6 +4,7 @@
 #include "Projectile/FPSProjectile.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include <AFPSProjectGameModeBase.h>
 // Sets default values
 AFPSProjectile::AFPSProjectile()
 {
@@ -44,6 +45,10 @@ void AFPSProjectile::OnHit(
 
         // Destroy the enemy actor
         OtherActor->Destroy();
+        if (AFPSProjectGameModeBase* GM = GetWorld()->GetAuthGameMode<AFPSProjectGameModeBase>())
+        {
+            GM->AddScore(10); // Add 10 points, for example
+        }
     }
     // Destroy the projectile on impact
     Destroy();

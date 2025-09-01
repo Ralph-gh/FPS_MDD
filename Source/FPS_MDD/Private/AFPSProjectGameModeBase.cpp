@@ -46,3 +46,19 @@ AFPSProjectGameModeBase::AFPSProjectGameModeBase()
     HUDClass = ADefenseHUD::StaticClass();
     // Runs when the object is created (before BeginPlay/StartPlay)
 }
+
+void AFPSProjectGameModeBase::AddScore(int32 Amount)
+{
+    Score += Amount;
+
+    UE_LOG(LogTemp, Log, TEXT("Score updated: %d"), Score);
+
+    // Optional: tell HUD to update immediately
+    if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+    {
+        if (ADefenseHUD* HUD = PC ? Cast<ADefenseHUD>(PC->GetHUD()) : nullptr)
+        {
+            HUD->SetScore(Score);
+        }
+    }
+}

@@ -159,6 +159,13 @@ void ADefenseHUD::DrawHUD()
 		BaseItem.Scale = FVector2D(2.0f * Dpi, 2.0f * Dpi);   // bigger than default
 		const FVector2D BasePos(BarPos.X, BarPos.Y + 60.f);   // a bit higher than the bar
 		Canvas->DrawItem(BaseItem, BasePos);
+
+		// --- Score label (NEW) ---
+		Canvas->DrawText(
+			GEngine->GetLargeFont(),
+			FString::Printf(TEXT("Score: %d"), CurrentScore),
+			BarPos.X, BarPos.Y + BarSize.Y + 12.f // just under the bar
+		);
 	}
 
 	// ---- "Wave N" under the bar ----
@@ -341,4 +348,9 @@ void ADefenseHUD::HideEndgameMenu()
 	}
 
 	bEndgameMenuVisible = false;
+}
+
+void ADefenseHUD::SetScore(int32 NewScore)
+{
+	CurrentScore = NewScore;
 }

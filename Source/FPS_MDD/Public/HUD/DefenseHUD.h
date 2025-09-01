@@ -78,10 +78,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Crosshair")
 	void SetCrosshairVisible(bool bVisible) { bShowCrosshair = bVisible; }
 
+	UFUNCTION(BlueprintCallable, Category = "HUD") //score UFUNCTION
+	void SetScore(int32 NewScore);
+
 private:
 	// Health bar data
 	float CurrentHealth = 100.f;
 	float MaxHealth = 100.f;
+	// --- Score ---
+	int32 CurrentScore = 0;
 
 	int32 CurrentWave = 1; //wave number
 
