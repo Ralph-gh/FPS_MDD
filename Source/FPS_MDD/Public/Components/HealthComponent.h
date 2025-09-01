@@ -32,6 +32,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Health")
 	bool IsDead() const { return CurrentHealth <= 0.f; }
 
+
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	void UpdateHUD() const;    // NEW
 };
+

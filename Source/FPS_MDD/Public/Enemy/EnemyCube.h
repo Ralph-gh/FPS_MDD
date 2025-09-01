@@ -42,12 +42,12 @@ private:
 
 	// Damage on contact
 	UPROPERTY(EditAnywhere, Category = "Combat", meta = (ClampMin = "0.0"))
-	float DamageOnImpact = 20.f;
-
-	// Callbacks
+	float DamageOnImpact = 20.f; //Change damage here
+	
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+		const FHitResult& Hit);
 
 	// Keep only if you want overlaps (we’ll disable generation in cpp to avoid double damage)
 	UFUNCTION()
