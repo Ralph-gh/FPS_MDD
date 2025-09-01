@@ -37,6 +37,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void UpdateHUD() const;    // NEW
+	void UpdateHUD() const; //HUD update
+	void HandleDeath();   //Handle death of base or other blueprints with this health component
 };
 
