@@ -48,15 +48,18 @@ void UDimensionComponent::ApplyForDimension(EDefenseDimension Active) const
 	AActor* Owner = GetOwner();
 	if (!Owner) return;
 
-	const bool bShouldBeVisible = (Active == Dimension);
+	const bool bVisible = (Active == Dimension);
 
-	// Visual visibility
-	Owner->SetActorHiddenInGame(!bShouldBeVisible);
+	// 1) Visuals only (always hide when not active)
+	Owner->SetActorHiddenInGame(!bVisible);
 
-	// Optional performance/interaction gating
-	if (bDisableCollisionAndTickWhenHidden)
+	// 2) Optional: collision/tick control (both default OFF so invisible actors still interact)
+	if (bAffectCollisionWhenHidden)
 	{
-		Owner->SetActorEnableCollision(bShouldBeVisible);
-		Owner->SetActorTickEnabled(bShouldBeVisible);
+		Owner->SetActorEnableCollision(bVisible);
+	}
+	if (bAffectTickWhenHidden)
+	{
+		Owner->SetActorTickEnabled(bVisible);
 	}
 }

@@ -36,6 +36,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimension")
 	bool bDisableCollisionAndTickWhenHidden = true;
 
+	// When hidden (inactive dimension), should we also disable collision?
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimension")
+	bool bAffectCollisionWhenHidden = false;   // <-- default false for your case
+
+	// When hidden, should we also disable Tick?
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dimension")
+	bool bAffectTickWhenHidden = false;        // <-- default false for your case
+
 	// Called by the manager (GameMode) when the active dimension changes
 	void ApplyForDimension(EDefenseDimension Active) const;
 
