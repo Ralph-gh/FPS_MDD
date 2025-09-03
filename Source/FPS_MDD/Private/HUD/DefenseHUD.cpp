@@ -349,7 +349,13 @@ void ADefenseHUD::HideEndgameMenu()
 	bEndgameMenuVisible = false;
 }
 
+void ADefenseHUD::SetWave(int32 NewWave)
+{
+	CurrentWave = NewWave;
+}
+
 void ADefenseHUD::SetScore(int32 NewScore)
 {
 	CurrentScore = NewScore;
 }
+

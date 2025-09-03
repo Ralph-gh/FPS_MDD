@@ -45,7 +45,7 @@ public:
 	bool IsEndgameMenuVisible() const { return bEndgameMenuVisible; }
 
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetWave(int32 InWave) { CurrentWave = FMath::Max(1, InWave); }//print wave number on screen
+	void SetWave(int32 InWave);//print wave number on screen
 
 	// --- Crosshair options ---
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crosshair")

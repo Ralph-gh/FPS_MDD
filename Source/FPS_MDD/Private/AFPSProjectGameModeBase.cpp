@@ -5,6 +5,7 @@
 #include "Components/DimensionComponent.h"
 #include "HUD/DefenseHUD.h"  
 #include "Engine/Engine.h"
+#include <Kismet/GameplayStatics.h>
 
 void AFPSProjectGameModeBase::StartPlay()
 {
@@ -13,25 +14,18 @@ void AFPSProjectGameModeBase::StartPlay()
 
     check(GEngine != nullptr);
 
+    // Initialize HUD with wave 1 (if your HUD exposes SetWave)
     if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
     {
-       /* // Log current state                                                              //Logs to check HUD status
-        UE_LOG(LogTemp, Warning, TEXT("GM HUDClass = %s"), *GetNameSafe(HUDClass));
-       // UE_LOG(LogTemp, Warning, TEXT("PC bShowHUD = %d"), PC->bShowHUD ? 1 : 0);
-        UE_LOG(LogTemp, Warning, TEXT("Existing HUD = %s"), *GetNameSafe(PC->GetHUD()));
-
-        // Force the HUD (even if something didn’t wire up)
-        PC->ClientSetHUD(ADefenseHUD::StaticClass());
-
-        UE_LOG(LogTemp, Warning, TEXT("After ClientSetHUD -> HUD = %s"), *GetNameSafe(PC->GetHUD()));
-        if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("ClientSetHUD called"));*/
-
-
-        if (ADefenseHUD* HUD = PC->GetHUD<ADefenseHUD>())
+        if (ADefenseHUD* HUD = PC ? Cast<ADefenseHUD>(PC->GetHUD()) : nullptr)
         {
-            HUD->SetWave(1);   // shows "Wave 1"
+            HUD->SetWave(CurrentWave);
         }
     }
+
+    // Start background monitoring
+    StartWaveMonitor();
+
 
     // 1. To print to screen
    // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Hello World, this is FPSGameModeBase! RG message"));
@@ -108,4 +102,70 @@ void AFPSProjectGameModeBase::BroadcastDimension()
             It.RemoveCurrent();
         }
     }
+}
+
+void AFPSProjectGameModeBase::StartWaveMonitor() // monitors enemies and check fo clear
+{
+    LastKnownEnemyCount = CountAliveEnemies();
+    GetWorldTimerManager().SetTimer(
+        WaveCheckTimer,
+        this,
+        &AFPSProjectGameModeBase::CheckForWaveClear,
+        WaveCheckPeriod,
+        true
+    );
+}
+
+void AFPSProjectGameModeBase::CheckForWaveClear()
+{
+    const int32 Count = CountAliveEnemies();
+
+    // Only advance when we had some enemies and now have none
+    if (Count == 0 && LastKnownEnemyCount > 0)
+    {
+        AdvanceWave();
+    }
+
+    LastKnownEnemyCount = Count;
+}
+
+int32 AFPSProjectGameModeBase::CountAliveEnemies() const
+{
+    TArray<AActor*> Found;
+    UGameplayStatics::GetAllActorsWithTag(GetWorld(), EnemyTag, Found);
+
+    int32 Alive = 0;
+    for (AActor* A : Found)
+    {
+        if (IsValid(A))      // covers null & pending-kill
+        {
+            ++Alive;
+        }
+    }
+    return Alive;
+}
+
+
+void AFPSProjectGameModeBase::AdvanceWave()
+{
+    ++CurrentWave;
+
+    UE_LOG(LogTemp, Log, TEXT("Wave cleared! Advancing to Wave %d"), CurrentWave);
+
+    // Update HUD immediately
+    if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+    {
+        if (ADefenseHUD* HUD = PC ? Cast<ADefenseHUD>(PC->GetHUD()) : nullptr)
+        {
+            HUD->SetWave(CurrentWave);
+        }
+    }
+
+    // TODO: Spawn next wave (hook your spawner here)
+    // Example patterns (implement later):
+    // 1) Find a placed spawner in level and call SpawnWave(CurrentWave)
+    //    TArray<AActor*> Spawners; UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemySpawner::StaticClass(), Spawners);
+    //    if (Spawners.Num() > 0) { Cast<AEnemySpawner>(Spawners[0])->SpawnWave(CurrentWave); }
+    //
+    // 2) Or just schedule a delayed spawn via GetWorldTimerManager().SetTimer(...)
 }

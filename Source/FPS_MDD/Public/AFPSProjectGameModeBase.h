@@ -18,6 +18,18 @@ class FPS_MDD_API AFPSProjectGameModeBase : public AGameModeBase
 public:
     AFPSProjectGameModeBase();
 
+
+    // ---- Wave / Enemy tracking ----
+    UFUNCTION(BlueprintPure, Category = "Waves")
+    int32 GetCurrentWave() const { return CurrentWave; }
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Waves")
+    FName EnemyTag = TEXT("enemy");            // set this on your enemy actors
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Waves", meta = (ClampMin = "0.05"))
+    float WaveCheckPeriod = 0.5f;              // seconds between checks
+
+
     // --- Score system ---
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Score")
     int32 Score = 0;
@@ -47,6 +59,18 @@ protected:
 
 
 private:
+    // State
+    int32 CurrentWave = 1;
+    int32 LastKnownEnemyCount = 0;
+
+    FTimerHandle WaveCheckTimer;
+
+    // Core loop
+    void StartWaveMonitor();
+    void CheckForWaveClear();
+    int32 CountAliveEnemies() const;
+    void AdvanceWave();
+    
     UPROPERTY(VisibleAnywhere, Category = "Dimension")
     EDefenseDimension CurrentDimension = EDefenseDimension::Normal;
 
