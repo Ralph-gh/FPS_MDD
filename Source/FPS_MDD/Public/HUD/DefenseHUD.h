@@ -19,6 +19,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;
 
+
 	// Health hook
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void SetBaseHealth(float InCurrent, float InMax);
@@ -28,6 +29,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD") void HideEndLevelButton();
 	UFUNCTION(BlueprintCallable, Category = "HUD") void ToggleEndLevelButton();
 	UFUNCTION(BlueprintPure, Category = "HUD") bool IsEndLevelButtonVisible() const { return bEndButtonVisible; }
+
+	// NEW: Score + Wave setters
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void SetScore(int32 InScore);
 
 	// Settings (pause) menu – call this from input (Esc), not automatically on BeginPlay.
 	void ShowSettingsMenu();
@@ -77,9 +82,6 @@ public:
 	// Helper to enable/disable from other classes (e.g., while a menu is open)
 	UFUNCTION(BlueprintCallable, Category = "Crosshair")
 	void SetCrosshairVisible(bool bVisible) { bShowCrosshair = bVisible; }
-
-	UFUNCTION(BlueprintCallable, Category = "HUD") //score UFUNCTION
-	void SetScore(int32 NewScore);
 
 private:
 	// Health bar data

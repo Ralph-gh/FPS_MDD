@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
 #include <GUI/Slate/SSettingsWidget.h>
+#include "AFPSProjectGameModeBase.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -65,17 +66,21 @@ void UHealthComponent::UpdateHUD() const
 
 void UHealthComponent::HandleDeath()
 {
-    AActor* Owner = GetOwner();
-    if (!Owner) return;
-
-    UE_LOG(LogTemp, Warning, TEXT("%s died -> Loading Endgame"), *Owner->GetName());
-
-    // Destroy the owning actor (ex: BP_DefenseBase)
-    Owner->Destroy();
-
-    // Load the Endgame map
-    if (UWorld* World = GetWorld())
+    if (AActor* Owner = GetOwner())
     {
-        UGameplayStatics::OpenLevel(World, FName(TEXT("/Game/Maps/Endgame")));
+        UE_LOG(LogTemp, Warning, TEXT("%s died -> Loading Endgame"), *Owner->GetName());
+
+        FString OptionsString;
+        if (UWorld* World = GetWorld())
+        {
+            if (AFPSProjectGameModeBase* GM = Cast<AFPSProjectGameModeBase>(World->GetAuthGameMode()))
+            {
+                OptionsString = FString::Printf(TEXT("FinalScore=%d"), GM->GetScore());
+            }
+        }
+
+        // Only ONE OpenLevel — with options
+        UGameplayStatics::OpenLevel(this, FName(TEXT("/Game/Maps/Endgame")), /*bAbsolute*/true, OptionsString);
+        // (No second OpenLevel; no need to destroy Owner — the world is being torn down)
     }
 }

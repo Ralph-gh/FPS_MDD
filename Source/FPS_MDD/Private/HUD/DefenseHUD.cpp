@@ -9,13 +9,27 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GUI/Slate/SEndgameMenuWidget.h"
+#include "AFPSProjectGameModeBase.h"
 
 void ADefenseHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
 	const FString Map = UGameplayStatics::GetCurrentLevelName(this, /*bRemovePrefix=*/true);
-
+	// DefenseHUD::BeginPlay() on Endgame
+	if (Map.Equals(TEXT("Endgame"), ESearchCase::IgnoreCase))
+	{
+		bShowGameEnded = true;
+		if (UWorld* World = GetWorld())
+		{
+			if (AFPSProjectGameModeBase* GM = World->GetAuthGameMode<AFPSProjectGameModeBase>())
+			{
+				SetScore(GM->GetScore());
+			}
+		}
+		ShowEndgameMenu();
+		return;
+	}
 	// Dedicated menu level
 	if (Map.Equals(TEXT("MainMenu"), ESearchCase::IgnoreCase))
 	{
@@ -134,7 +148,17 @@ void ADefenseHUD::DrawHUD()
 		Item.Scale = FVector2D(7.5f * (Canvas->ClipY / 1080.f));
 		Item.bCentreX = true;
 		Item.bCentreY = true;
-		Canvas->DrawItem(Item, FVector2D(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.9f));
+		Canvas->DrawItem(Item, FVector2D(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.25f));
+
+		// White "Final Score: N"
+		FString ScoreText = FString::Printf(TEXT("Final Score: %d"), CurrentScore);
+		FCanvasTextItem ScoreItem(FVector2D::ZeroVector, FText::FromString(ScoreText), Font, FLinearColor::White);
+		ScoreItem.EnableShadow(FLinearColor::Black);
+		ScoreItem.Scale = FVector2D(3.5f * (Canvas->ClipY / 1080.f));
+		ScoreItem.bCentreX = true;
+		ScoreItem.bCentreY = true;
+		Canvas->DrawItem(ScoreItem, FVector2D(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.9f));
+
 		return; // Skip other HUD when showing end screen
 	}
 
@@ -241,6 +265,17 @@ FReply ADefenseHUD::OnEndLevelClicked()
 		PlayerOwner->bShowMouseCursor = false;
 		PlayerOwner->SetInputMode(FInputModeGameOnly());
 	}
+
+	// DefenseHUD::OnEndLevelClicked()
+	FString OptionsString;
+	if (UWorld* World = GetWorld())
+	{
+		if (AFPSProjectGameModeBase* GM = World->GetAuthGameMode<AFPSProjectGameModeBase>())
+		{
+			OptionsString = FString::Printf(TEXT("FinalScore=%d"), GM->GetScore());
+		}
+	}
+	UGameplayStatics::OpenLevel(this, FName(TEXT("/Game/Maps/Endgame")), true, OptionsString);
 
 	UGameplayStatics::OpenLevel(this, FName(TEXT("/Game/Maps/Endgame")));
 	LogCurrentMap(this, TEXT("AfterOpenLevel"));
@@ -358,4 +393,5 @@ void ADefenseHUD::SetScore(int32 NewScore)
 {
 	CurrentScore = NewScore;
 }
+
 

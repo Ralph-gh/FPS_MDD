@@ -89,6 +89,14 @@ void AFPSProjectGameModeBase::UnregisterDimensionComponent(UDimensionComponent* 
     RegisteredComponents.Remove(Comp);
 }
 
+//initialize game score
+void AFPSProjectGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+    Super::InitGame(MapName, Options, ErrorMessage);
+    const FString ScoreStr = UGameplayStatics::ParseOption(Options, TEXT("FinalScore"));
+    if (!ScoreStr.IsEmpty()) { Score = FCString::Atoi(*ScoreStr); }
+}
+
 void AFPSProjectGameModeBase::BroadcastDimension()
 {
     for (auto It = RegisteredComponents.CreateIterator(); It; ++It)

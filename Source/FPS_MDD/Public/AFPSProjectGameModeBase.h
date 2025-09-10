@@ -1,11 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "Components/DimensionComponent.h"
+#include "HUD/DefenseHUD.h"
 #include "AFPSProjectGameModeBase.generated.h"
+
 
 class UDimensionComponent; // from our component
 enum class EDefenseDimension : uint8; // forward declare enum (included via the .cpp)
@@ -39,6 +41,7 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "Score")
     int32 GetScore() const { return Score; }
+   
 
     // ----- Dimension management -----
     UFUNCTION(BlueprintCallable, Category = "Dimension")
@@ -54,6 +57,8 @@ public:
     void RegisterDimensionComponent(UDimensionComponent* Comp);
     void UnregisterDimensionComponent(UDimensionComponent* Comp);
 
+   //score
+    virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 protected:
 	virtual void StartPlay() override;
 
