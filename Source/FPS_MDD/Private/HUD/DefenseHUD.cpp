@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GUI/Slate/SEndgameMenuWidget.h"
 #include "AFPSProjectGameModeBase.h"
+#include "GameFramework/Character.h"            // ACharacter, GetMesh()
 
 void ADefenseHUD::BeginPlay()
 {
@@ -290,6 +291,15 @@ void ADefenseHUD::ToggleEndLevelButton()
 
 void ADefenseHUD::ShowMainMenu()
 {
+	if (APlayerController* PC = GetOwningPlayerController())
+	{
+		if (ACharacter* Char = Cast<ACharacter>(PC->GetPawn()))
+		{
+			// Only hide for local owner so others could still see it in multiplayer
+			Char->GetMesh()->SetOwnerNoSee(true);
+		}
+	}
+	
 	if (bMainMenuVisible || !GEngine || !GEngine->GameViewport) return;
 
 	// 1) Build the menu widget
@@ -315,6 +325,10 @@ void ADefenseHUD::ShowMainMenu()
 
 void ADefenseHUD::HideMainMenu()
 {
+	if (APlayerController* PC = GetOwningPlayerController())
+	{
+		PC->SetViewTarget(PC->GetPawn()); // return camera to player
+	}
 	if (!bMainMenuVisible || !GEngine || !GEngine->GameViewport) return;
 
 	if (MainMenuContainer.IsValid())
